@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class PostController extends Controller
 {
@@ -26,12 +27,12 @@ class PostController extends Controller
       'body' => 'required',
     ]);
 
-    $post = Post::create($data);
+    $post = $request->user()->posts()->create($data); // Create a post for the authenticated user
 
     return response()->json([
-      'post' => $post,
       'message' => 'Post created successfully!',
       'status' => 201,
+      'post' => $post,
     ], 201);
   }
 
@@ -48,6 +49,8 @@ class PostController extends Controller
    */
   public function update(Request $request, Post $post): JsonResponse
   {
+    Gate::authorize('modify', $post);
+
     $data = $request->validate([
       'title' => 'required|max:255',
       'body' => 'required',
@@ -56,9 +59,9 @@ class PostController extends Controller
     $post->update($data);
 
     return response()->json([
-      'post' => $post,
       'message' => 'Post updated successfully!',
       'status' => 200,
+      'post' => $post,
     ], 200);
   }
 
@@ -67,6 +70,8 @@ class PostController extends Controller
    */
   public function destroy(Post $post): JsonResponse
   {
+    Gate::authorize('delete', $post);
+
     $post->delete();
 
     return response()->json([

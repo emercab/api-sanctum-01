@@ -14,4 +14,5 @@ Route::controller(AuthController::class)->group(function () {
   Route::post('logout', 'logout')->middleware('auth:sanctum');
 });
 
-Route::apiResource('posts', PostController::class);
+Route::apiResource('posts', PostController::class)
+  ->middleware('auth:sanctum')->except(['index', 'show']);
